@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 notificationChannel = NotificationChannel(channelId, descripcion, NotificationManager.IMPORTANCE_HIGH)
                 notificationChannel.enableVibration(true)
+                notificationChannel.setShowBadge(true)
 
                 notificationManager.createNotificationChannel(notificationChannel)
 
@@ -43,6 +44,8 @@ class MainActivity : AppCompatActivity() {
                     .setContentText("You have received a new message!")
                     .setSmallIcon(R.drawable.ic_launcher_background)
                     .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+                    .setTimeoutAfter(2500L)
 
             } else {
                 builder = Notification.Builder(this)
@@ -50,6 +53,7 @@ class MainActivity : AppCompatActivity() {
                     .setContentText("You have received a new message!")
                     .setSmallIcon(R.drawable.ic_launcher_background)
                     .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
             }
 
                 notificationManager.notify(0, builder.build())
