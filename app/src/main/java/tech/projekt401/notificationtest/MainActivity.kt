@@ -10,7 +10,6 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
-import androidx.core.content.getSystemService
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,52 +17,68 @@ class MainActivity : AppCompatActivity() {
     lateinit var notificationChannel: NotificationChannel
     lateinit var builder: Notification.Builder
     val channelId = "tech.projekt401.notificationtest"
-    val descripcion = "My notification"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        crearCanalDeNotificacion(true, true)
+
         val notificationButton = findViewById<Button>(R.id.button)
-        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val intent = Intent(applicationContext, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         notificationButton.setOnClickListener {
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                notificationChannel = NotificationChannel(channelId, descripcion, NotificationManager.IMPORTANCE_HIGH)
-                notificationChannel.enableVibration(true)
-                notificationChannel.setShowBadge(true)
-
-                notificationManager.createNotificationChannel(notificationChannel)
-
-                builder = Notification.Builder(this, channelId)
-                    .setContentTitle("Hey there...")
-                    .setContentText("You have received a new message!")
-                    .setSmallIcon(R.drawable.ic_launcher_background)
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true)
-                    .setTimeoutAfter(2500L)
-
-            } else {
-                builder = Notification.Builder(this)
-                    .setContentTitle("Hey there...")
-                    .setContentText("You have received a new message!")
-                    .setSmallIcon(R.drawable.ic_launcher_background)
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true)
-            }
-
-                notificationManager.notify(0, builder.build())
-
+            construirNotificacion(pendingIntent)
         }
 
     }
 
-    fun createNotificationChannel(){
 
+    private fun construirNotificacion(pendingIntent: PendingIntent){
+        // Creando el canal de notificacion (deberia ir en una funcion aparte)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            // Construyendo la notificacion para Android mayor que API26
+            builder = Notification.Builder(this, channelId)
+                .setContentTitle("Hola...")
+                .setContentText("Has recibido un nuevo mensaje!")
+                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+
+        } else {
+            // Construyendo la notificacion para Android menor que API26
+            builder = Notification.Builder(this)
+                .setContentTitle("Hola...")
+                .setContentText("Has recibido un nuevo mensaje!")
+                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+        }
+        notificationManager.notify(0, builder.build())
+    }
+
+
+    private fun crearCanalDeNotificacion(vibration: Boolean, mostrarBadge: Boolean){
+
+        val channelDescription = "Este canal es para hacer pruebas de notificaciones"
+        val importance = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            NotificationManager.IMPORTANCE_HIGH
+        } else {
+            TODO("VERSION.SDK_INT < N")
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationChannel = NotificationChannel(channelId, channelDescription, importance)
+            notificationChannel.enableVibration(vibration)
+            notificationChannel.setShowBadge(mostrarBadge)
+
+            notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
     }
 
 }
